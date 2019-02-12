@@ -1,2 +1,4 @@
 # Bio-594
-R code and Visualizations from #MakeoverMonday and Bio-594 classwork 
+This repository includes the R code, original data sets, and final visulization for BIO 594.
+
+Raw data comes from Data_World and #MakeoverMonday
