@@ -1,0 +1,51 @@
+
+# Set Working Directory
+setwd("~/Makeover-Monday")
+
+# Load Packages
+library(ggplot2)
+library(ggpubr)
+library(Rmisc)
+library(plotly)
+library(gridExtra)
+library(gridBase)
+library(dplyr)
+library(lubridate)
+library(gdata)
+library(rmarkdown)
+
+# Load Data
+data <- read.csv(file="Arctic-Sea-Ice-Extent.csv", header = T, sep = ",", stringsAsFactors = F, fileEncoding = "Latin1")
+# Add seaice column name
+data$seaice <- data$Extent..million.sq.km.
+
+# Set mean sea ice by month
+data$date <- as.Date(data$ï..Date, "%m/%d/%Y")
+
+# Add new month and year column
+data$month <- strftime(data$date, "%m")
+data$year <- strftime(data$date, "%Y")
+
+# Aggregate by month and year
+data.aggregate <- aggregate(data$seaice ~ data$month + data$year, FUN = mean)
+data.aggregate2 <- aggregate(data$seaice ~ data$month + data$year, FUN = length)
+data.aggregate4 <- cbind(data.aggregate, data.aggregate2)
+data.aggregate$count <- data.aggregate2$`data$seaice`
+
+names(data.aggregate) <- c("Month", "Year", "Mean", "Count")
+
+# Plot by year (Visulization-1)
+p1 <- ggplot() + geom_line(aes(x=data.aggregate$Month, y=data.aggregate$Mean, color=data.aggregate$Year, group=data.aggregate$Year), data = data.aggregate, stat = "identity")+ theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black")) + labs(x="Month", y="Extant of Sea Ice (millions of kilometers squared") + ggtitle("Mean Arctic Sea Ice Coverage") + theme(axis.text.x=element_text(angle = 50, size = 15, vjust = 0.5)) + scale_x_discrete(breaks=c("01","02","03","04","05","06","07","08","09","10","11","12"),labels=c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")) + scale_color_discrete(name="Year")
+
+
+
+
+ggplotly(p1)
+
+# Add Animation (Visualization-1a)
+p2 <- ggplot() + geom_line(aes(x=data.aggregate$Month, y=data.aggregate$Mean, color=data.aggregate$Year, group=data.aggregate$Year, frame=Year), data = data.aggregate, stat = "identity")+ theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line = element_line(colour = "black")) + labs(x="Month", y="Extant of Sea Ice (millions of kilometers squared") + ggtitle("Mean Arctic Sea Ice Coverage") + theme(axis.text.x=element_text(angle = 50, size = 15, vjust = 0.5)) + scale_x_discrete(breaks=c("01","02","03","04","05","06","07","08","09","10","11","12"),labels=c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")) + scale_color_discrete(name="Year") + theme(legend.position = "none")
+
+
+plotme <- p2 %>%
+  add_lines(x=data.aggregate$Month, y=data.aggregate$Year)
+ggplotly(plotme)
